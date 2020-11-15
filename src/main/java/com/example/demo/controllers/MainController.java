@@ -1,5 +1,9 @@
 package com.example.demo.controllers;
 
+import jdk.internal.util.xml.impl.Input;
+import org.apache.http.entity.ContentType;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -8,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.example.demo.model.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.io.File;
@@ -28,8 +33,8 @@ public class MainController {
     }
 
     @RequestMapping(value = "/download", method = RequestMethod.GET)
-    public String uploadPhotoForm(HttpServletRequest request,HttpServletResponse response) {
-        try{
+    public void uploadPhotoForm(HttpServletRequest request,HttpServletResponse response) {
+        try {
             //File id on google
             String fileId="1DU9Y0ECFMZH-HigL0Yl6exvwpR2pKSQP";
 
@@ -38,16 +43,12 @@ public class MainController {
 
             //HIDDEN URL
             InputStream inputStream = new URL("https://docs.google.com/uc?export=download&id="+fileId).openStream();
-            Files.copy(inputStream, Paths.get("test.jpg"), StandardCopyOption.REPLACE_EXISTING);
             response.addHeader("Content-Disposition", "attachment; filename=test.jpg");
-
-        }catch (Exception e){
+            IOUtils.copy(inputStream, response.getOutputStream());
+            response.getOutputStream().flush();
+        } catch (Exception e) {
             e.printStackTrace();
-            ModelAndView mav=new ModelAndView("failure");
-            mav.addObject("log",e.toString());
-            return "failure";
         }
-        return "downsuccess";
     }
 
 }
